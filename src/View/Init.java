@@ -15,7 +15,6 @@ import javax.swing.JTable;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import laboclin.SqlConector;
 
@@ -36,30 +35,9 @@ public class Init extends javax.swing.JFrame {
         mostrar();
     }
 
-    public void mostrar() {
+    private void mostrar() {
         String query = "select * from paciente where oculto = 0";
-        Statement st;
-        Connection con = SqlConector.conectar();
-        
-        DefaultTableModel model = (DefaultTableModel) patientsTable.getModel();
-        while (model.getRowCount() > 0) {
-            model.removeRow(0);
-        }
-        String[] data = new String[7];
-        try {
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            while (rs.next()) {
-                for (int i = 0; i < 6; i++) {
-                    data[i] = rs.getString(i + 1);
-                }
-                data[6] = rs.getString(8);
-                model.addRow(data);
-            }
-            con.close();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
-        }
+        dataTableHandle("QueryReturnRefreshTable",query,new String[7]);
     }
 
     /**
@@ -75,14 +53,20 @@ public class Init extends javax.swing.JFrame {
         patientsTable = new javax.swing.JTable();
         btnAdd = new javax.swing.JButton();
         btnSalir = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        btnDel = new javax.swing.JButton();
+        btnEdit = new javax.swing.JButton();
+        btnAdd2 = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        searchTable = new javax.swing.JTable();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setUndecorated(true);
-        setType(java.awt.Window.Type.UTILITY);
+        setTitle("Laboratorio - LABOCLIN");
+        setAutoRequestFocus(false);
+        setBackground(javax.swing.UIManager.getDefaults().getColor("InternalFrame.activeTitleGradient"));
 
         patientsTable.setAutoCreateRowSorter(true);
-        patientsTable.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        patientsTable.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         patientsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -91,9 +75,16 @@ public class Init extends javax.swing.JFrame {
                 "ID", "Apellido Paterno", "Apellido Materno", "Nombres", "Edad", "Genero", "Fecha Registro"
             }
         ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
+            };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false, false, false
             };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
@@ -116,6 +107,7 @@ public class Init extends javax.swing.JFrame {
             patientsTable.getColumnModel().getColumn(6).setResizable(false);
         }
 
+        btnAdd.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         btnAdd.setText("Agregar");
         btnAdd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -123,6 +115,7 @@ public class Init extends javax.swing.JFrame {
             }
         });
 
+        btnSalir.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         btnSalir.setText("Salir");
         btnSalir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -130,13 +123,72 @@ public class Init extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setText("Eliminar");
-        jButton3.setMaximumSize(new java.awt.Dimension(71, 23));
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        btnDel.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        btnDel.setText("Eliminar");
+        btnDel.setMaximumSize(new java.awt.Dimension(71, 23));
+        btnDel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                btnDelActionPerformed(evt);
             }
         });
+
+        btnEdit.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        btnEdit.setText("Editar");
+        btnEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditActionPerformed(evt);
+            }
+        });
+
+        btnAdd2.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        btnAdd2.setText("Buscar");
+        btnAdd2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAdd2ActionPerformed(evt);
+            }
+        });
+
+        searchTable.setAutoCreateRowSorter(true);
+        searchTable.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        searchTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "ID", "Apellido Paterno", "Apellido Materno", "Nombres", "Edad", "Genero", "Fecha Registro"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, true, true, true, true, true, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        searchTable.setAutoscrolls(false);
+        searchTable.getTableHeader().setReorderingAllowed(false);
+        jScrollPane2.setViewportView(searchTable);
+        if (searchTable.getColumnModel().getColumnCount() > 0) {
+            searchTable.getColumnModel().getColumn(0).setResizable(false);
+            searchTable.getColumnModel().getColumn(1).setResizable(false);
+            searchTable.getColumnModel().getColumn(2).setResizable(false);
+            searchTable.getColumnModel().getColumn(3).setResizable(false);
+            searchTable.getColumnModel().getColumn(4).setResizable(false);
+            searchTable.getColumnModel().getColumn(5).setResizable(false);
+            searchTable.getColumnModel().getColumn(6).setResizable(false);
+        }
+
+        jLabel1.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("Listado de Pacientes");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -144,27 +196,40 @@ public class Init extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 671, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnAdd, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 727, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnEdit, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnDel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
+                    .addComponent(btnAdd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnAdd2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnSalir, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnAdd2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 37, Short.MAX_VALUE)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnAdd)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnDel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnEdit)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnSalir))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(22, 22, 22))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 346, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         pack();
@@ -172,7 +237,7 @@ public class Init extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        String[] data = new String[6];
+        String[] data = new String[7];
         edit = new Register(data);
         setVisibleAtClose();
         this.setVisible(false);
@@ -217,45 +282,124 @@ public class Init extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_btnSalirActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        
-        Connection con = SqlConector.conectar();
-        String query = "UPDATE paciente SET oculto = 1 WHERE ID_PAC = " + idSelected;
-        PreparedStatement pstmt;
-        String mess;
-        int confirmDel = JOptionPane.showConfirmDialog(this, "Confirmar","Confirmar",JOptionPane.YES_NO_OPTION);
-        if(confirmDel == 0) {
-            try{
-                pstmt = con.prepareStatement(query);
-                pstmt.executeUpdate();
-                con.close();
-            }catch(SQLException e){
-                JOptionPane.showMessageDialog(null, e.getMessage());
+    private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
+        String query = "UPDATE paciente SET oculto = 1 WHERE ID_PAC = " + idSelected;    
+        dataTableHandle("SpecifyQueryDelete",query,new String[7]);
+        mostrar();          
+    }//GEN-LAST:event_btnDelActionPerformed
+
+    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
+        String[] data = new String[7];
+        String query = "SELECT ID_PAC, ApePat_PAC, ApeMat_PAC, Nombres_PAC, Edad_PAC,"+
+        "Genero_PAC, FechaReg_PAC FROM paciente WHERE ID_PAC = " + idSelected;
+        dataTableHandle("QueryReturnEdit", query, data);
+//        DefaultTableModel def = (DefaultTableModel) patientsTable.getModel();
+//        String[] data = new String[7];
+//        Connection con = SqlConector.conectar();
+//        try{
+//            Statement st = con.createStatement();
+//            ResultSet rs = st.executeQuery(query);
+//            rs.next();
+//            for (int i = 1; i < def.getColumnCount()+1; i++) {
+//                data[i-1] = rs.getString(i);
+//            }
+//            con.close();
+//        }catch(SQLException e){
+//            JOptionPane.showMessageDialog(null, e.getMessage());
+//        }
+        edit = new Register(data);
+        setVisibleAtClose();
+        this.setVisible(false);
+        edit.setVisible(true);
+    }//GEN-LAST:event_btnEditActionPerformed
+
+    private void btnAdd2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdd2ActionPerformed
+        String[] dataSearch = new String[7];
+        DefaultTableModel model = (DefaultTableModel) searchTable.getModel();
+        for(int i = 0; i < 7; i++){
+            dataSearch[i] = (String) model.getValueAt(0, i);
+            if(dataSearch[i] == null){
+                dataSearch[i] = "";
             }
-            mostrar();  
+            //System.out.println(dataSearch[i]);
         }
-    }//GEN-LAST:event_jButton3ActionPerformed
+        String query = "SELECT ID_PAC, ApePat_PAC, ApeMat_PAC, Nombres_PAC, Edad_PAC,"+
+        "Genero_PAC, FechaReg_PAC FROM paciente WHERE ApePat_PAC LIKE ? AND "+
+        "ApeMat_PAC LIKE ? AND Nombres_PAC LIKE ? AND Edad_PAC LIKE ? AND Genero_PAC LIKE ? AND oculto = 0";
+        
+        dataTableHandle("SpecifyQuerySearch", query, dataSearch);
+        //String query = "SELECT * FROM paciente WHERE "
+    }//GEN-LAST:event_btnAdd2ActionPerformed
 
     private void patientsTableMouseClicked(MouseEvent me) {
-        String data[] = new String[6];
         DefaultTableModel def = (DefaultTableModel) patientsTable.getModel();
-        JTable target = (JTable) me.getSource();
-        if (me.getClickCount() == 2) {
-            int row = target.getSelectedRow();
-            for (int i = 0; i < def.getColumnCount(); i++) {
-                data[i] = (String) def.getValueAt(row, i);
+        JTable target = (JTable) me.getSource();    
+        int row = target.getSelectedRow();
+        idSelected = Integer.parseInt( (String) def.getValueAt(row, 0));
+    }
+    
+    private void dataTableHandle(String action, String query, String[] data){
+        Connection con = SqlConector.conectar();
+        DefaultTableModel model = (DefaultTableModel) patientsTable.getModel();
+        String message;
+        try{
+            if(action.contains("SpecifyQuery")){
+                PreparedStatement ps = con.prepareStatement(query);    
+                if(action.contains("Delete")) {
+                    int confirmDel = JOptionPane.showConfirmDialog(this, "Confirmar","Confirmar",JOptionPane.YES_NO_OPTION);
+                    if(confirmDel == 0) {
+                        ps.executeUpdate();
+                    }
+                }else if(action.contains("Search")){
+                    ps.setString(1, "%" + data[1] + "%");
+                    ps.setString(2, "%" + data[2] + "%");
+                    ps.setString(3, "%" + data[3] + "%");
+                    ps.setString(4, "%" + data[4] + "%");
+                    ps.setString(5, "%" + data[5] + "%");
+                    //ps.setString(7, "'%" + data[6] + "%'");
+                    
+                    ResultSet rs = ps.executeQuery();
+                    
+                    while(model.getRowCount() > 0){
+                        model.removeRow(0);
+                    }
+                    while(rs.next()){
+                        data = new String[7];
+                        for(int i=1;i<model.getColumnCount()+1;i++)
+                            data[i-1] = rs.getString(i);
+                        model.addRow(data);
+                    }
+                }
             }
-            edit = new Register(data);
-            setVisibleAtClose();
-            this.setVisible(false);
-            edit.setVisible(true);
-            //JOptionPane.showMessageDialog(null, patientsTable.getValueAt(row, 0));
-        }else{
-            int row = target.getSelectedRow();
-            idSelected = Integer.parseInt( (String) def.getValueAt(row, 0));
+            if(action.contains("QueryReturn")){
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery(query);
+                if(action.contains("Edit")){
+                    while(rs.next()){
+                        for (int i = 1; i < model.getColumnCount()+1; i++) {
+                            data[i-1] = rs.getString(i);
+                        }
+                    }
+                }
+                if(action.contains("RefreshTable")){
+                    while(model.getRowCount() > 0){
+                        model.removeRow(0);
+                    }
+                    while(rs.next()){
+                        for(int i = 0; i < 6 ; i++){
+                            data[i] = rs.getString(i+1);
+                        }
+                        data[6] = rs.getString(8);
+                        model.addRow(data);
+                    }
+                }
+            }
+            con.close();
+        }catch(SQLException e){
+            JOptionPane.showMessageDialog(null, e.getMessage());
         }
     }
-
+    
     /**
      * @param args the command line arguments
      */
@@ -293,9 +437,14 @@ public class Init extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
+    private javax.swing.JButton btnAdd2;
+    private javax.swing.JButton btnDel;
+    private javax.swing.JButton btnEdit;
     private javax.swing.JButton btnSalir;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable patientsTable;
+    private javax.swing.JTable searchTable;
     // End of variables declaration//GEN-END:variables
 }
